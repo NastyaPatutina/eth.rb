@@ -43,11 +43,15 @@ module Eth
     # @param contract_index [Number] specify contract.
     # @return [Eth::Contract::Object] Returns the class of the smart contract.
     # @raise [ArgumentError] if the file path is empty or no contracts were compiled.
-    def self.from_file(file:, contract_index: 0)
+    def self.from_file(file:, contract_name: nil)
       raise ArgumentError, "Cannot find the contract at #{file.to_s}!" if !File.exist?(file.to_s)
       contracts = Eth::Contract::Initializer.new(file).build_all
       raise ArgumentError, "No contracts compiled." if contracts.empty?
-      contracts[contract_index].class_object.new
+      if contract_name
+        contracts.find{ |contract| contract.name == contract_name }.class_object.new
+      else
+        contracts.first.class_object.new
+      end
     end
 
     # Creates a contract wrapper from ABI and address.

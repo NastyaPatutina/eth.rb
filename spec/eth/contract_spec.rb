@@ -47,9 +47,9 @@ describe Contract do
     end
 
     it "arguments are missing" do
-      expect { Contract.from_file() }.to raise_error ArgumentError, "missing keyword: :file"
-      expect { Contract.from_abi(name: name, address: addr) }.to raise_error ArgumentError, "missing keyword: :abi"
-      expect { Contract.from_bin(name: name, abi: abi) }.to raise_error ArgumentError, "missing keyword: :bin"
+      expect { Contract.from_file() }.to raise_error ArgumentError, "missing keyword: file"
+      expect { Contract.from_abi(name: name, address: addr) }.to raise_error ArgumentError, "missing keyword: abi"
+      expect { Contract.from_bin(name: name, abi: abi) }.to raise_error ArgumentError, "missing keyword: bin"
     end
 
     it "invalid abi json parsing fails" do
@@ -60,9 +60,9 @@ describe Contract do
 
     it "contact index can be specified" do
       file = "spec/fixtures/contracts/greeter.sol"
-      greeter = Contract.from_file(file: file, contract_index: 0)
+      greeter = Contract.from_file(file: file, contract_name: 'Greeter')
       expect(greeter).to be_instance_of(Eth::Contract::Greeter)
-      mortal = Contract.from_file(file: file, contract_index: 1)
+      mortal = Contract.from_file(file: file, contract_name: 'Mortal')
       expect(mortal).to be_instance_of(Eth::Contract::Mortal)
     end
   end

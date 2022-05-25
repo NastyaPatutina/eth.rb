@@ -63,7 +63,7 @@ module Eth
     #
     # @return [Eth::Address] the coinbase account address.
     def default_account
-      @default_account ||= Address.new eth_coinbase["result"]
+      @default_account ||= Address.new eth_accounts["result"][0]
     end
 
     # Gets the chain ID of the connected network.
@@ -184,10 +184,10 @@ module Eth
     # @raise [ArgumentError] in case the contract does not have any source.
     def deploy(contract, sender_key: nil, legacy: false)
       raise ArgumentError, "Cannot deploy contract without source or binary!" if contract.bin.nil?
-      gas_limit = Tx.estimate_intrinsic_gas(contract.bin) + Tx::CREATE_GAS
+      gas_limit_value = Tx.estimate_intrinsic_gas(contract.bin, [], gas_limit) + Tx::CREATE_GAS
       params = {
         value: 0,
-        gas_limit: gas_limit,
+        gas_limit: gas_limit_value,
         chain_id: chain_id,
         data: contract.bin,
       }
@@ -267,11 +267,11 @@ module Eth
     #   @param address [String] contract address.
     # @return [Object] returns the result of the call.
     def transact(contract, function_name, *args, **kwargs)
-      gas_limit = Tx.estimate_intrinsic_gas(contract.bin) + Tx::CREATE_GAS
+      gas_limit_value = Tx.estimate_intrinsic_gas(contract.bin, [], gas_limit) + Tx::CREATE_GAS
       fun = contract.functions.select { |func| func.name == function_name }[0]
       params = {
         value: 0,
-        gas_limit: gas_limit,
+        gas_limit: gas_limit_value,
         chain_id: chain_id,
         to: kwargs[:address] || contract.address,
         data: call_payload(fun, args),

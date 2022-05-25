@@ -59,7 +59,7 @@ module Eth
       # @return [Eth::Abi::Type] a parsed Type object.
       # @raise [ParseError] if it fails to parse the type.
       def parse(type)
-        _, base_type, sub_type, dimension = /([a-z]*)([0-9]*x?[0-9]*)((\[[0-9]*\])*)/.match(type).to_a
+        _, base_type, sub_type, dimension = /([a-zA-Z]*)([0-9]*x?[0-9]*)((\[[0-9]*\])*)/.match(type).to_a
 
         # type dimension can only be numeric
         dims = dimension.scan(/\[[0-9]*\]/)
@@ -170,7 +170,9 @@ module Eth
         else
 
           # we cannot parse arbitrary types such as 'decimal' or 'hex'
-          raise ParseError, "Unknown base type"
+          # If Start with capital letter it is name of other contract (fix for libraries).
+          # Compiler will raise exception if type unknown
+          raise ParseError, "Unknown base type #{base_type}" unless base_type[0].match?(/[A-Z]/)
         end
       end
     end

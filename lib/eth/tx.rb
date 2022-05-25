@@ -158,8 +158,8 @@ module Eth
     # @param data [String] the call data.
     # @param list [Array] the access list.
     # @return [Integer] the estimated intrinsic gas cost.
-    def estimate_intrinsic_gas(data = "", list = [])
-      gas = DEFAULT_GAS_LIMIT
+    def estimate_intrinsic_gas(data = "", list = [], gas = DEFAULT_GAS_LIMIT)
+      gas ||= DEFAULT_GAS_LIMIT
       unless data.nil? or data.empty?
         data = Util.hex_to_bin data if Util.is_hex? data
 

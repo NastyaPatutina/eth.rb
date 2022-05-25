@@ -11,6 +11,7 @@ coverage/
 InstalledFiles
 pkg/
 tmp/
+.idea
 
 # RSpec configuration and generated files:
 .rspec
