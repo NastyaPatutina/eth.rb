@@ -67,5 +67,8 @@ module Eth
 
     # Infinity as constant for convenience.
     INFINITY = (1.0 / 0.0).freeze
+
+    # Null address value
+    NULL_ADDRESS = '0x0000000000000000000000000000000000000000'.freeze
   end
 end

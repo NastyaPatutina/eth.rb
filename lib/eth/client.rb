@@ -162,8 +162,8 @@ module Eth
     #   @param sender_key [Eth::Key] the sender private key.
     #   @param legacy [Boolean] enables legacy transactions (pre-EIP-1559).
     # @return [String] the contract address.
-    def deploy_and_wait(contract, sender_key: nil, legacy: false)
-      hash = wait_for_tx(deploy(contract, sender_key: sender_key, legacy: legacy))
+    def deploy_and_wait(contract, *args, sender_key: nil, legacy: false)
+      hash = wait_for_tx(deploy(contract, *args, sender_key: sender_key, legacy: legacy))
       addr = eth_get_transaction_receipt(hash)["result"]["contractAddress"]
       contract.address = Address.new(addr).to_s
     end
@@ -182,14 +182,14 @@ module Eth
     #   @param legacy [Boolean] enables legacy transactions (pre-EIP-1559).
     # @return [String] the transaction hash.
     # @raise [ArgumentError] in case the contract does not have any source.
-    def deploy(contract, sender_key: nil, legacy: false)
+    def deploy(contract, *args, sender_key: nil, legacy: false)
       raise ArgumentError, "Cannot deploy contract without source or binary!" if contract.bin.nil?
       gas_limit_value = Tx.estimate_intrinsic_gas(contract.bin, [], gas_limit) + Tx::CREATE_GAS
       params = {
         value: 0,
         gas_limit: gas_limit_value,
         chain_id: chain_id,
-        data: contract.bin,
+        data: deploy_payload(contract, *args),
       }
       if legacy
         params.merge!({
@@ -218,6 +218,15 @@ module Eth
         })
         return eth_send_transaction(params)["result"]
       end
+    end
+
+    def deploy_payload(contract, *args)
+      return contract.bin if contract.constructor_inputs.empty?
+      raise ArgumentError, "Wrong number of arguments in a constructor" if args.length != contract.constructor_inputs.length
+
+      types = contract.constructor_inputs.map { |i| i.type }
+      encoded_str = Util.bin_to_hex(Eth::Abi.encode(types, args))
+      contract.bin + encoded_str.to_s
     end
 
     # Calls a contract function without executing it
