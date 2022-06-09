@@ -77,10 +77,11 @@ module Eth
       if %w(string bytes).include? type.base_type and type.sub_type.empty?
         raise EncodingError, "Argument must be a String" unless arg.instance_of? String
 
+        content = arg.bytes.pack("C*")
         # encodes strings and bytes
-        size = encode_type Type.size_type, arg.size
-        padding = Constant::BYTE_ZERO * (Util.ceil32(arg.size) - arg.size)
-        return "#{size}#{arg}#{padding}"
+        size = encode_type Type.size_type, content.size
+        padding = Constant::BYTE_ZERO * (Util.ceil32(content.size) - content.size)
+        return "#{size}#{content}#{padding}"
       elsif type.is_dynamic?
         raise EncodingError, "Argument must be an Array" unless arg.instance_of? Array
 
@@ -210,7 +211,7 @@ module Eth
         raise DecodingError, "Wrong data size for string/bytes object" unless data.size == Util.ceil32(l)
 
         # decoded strings and bytes
-        return data[0, l]
+        return data[0, l].force_encoding('utf-8')
       elsif type.is_dynamic?
         l = Util.deserialize_big_endian_to_int arg[0, 32]
         nested_sub = type.nested_sub
